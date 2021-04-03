@@ -1,0 +1,32 @@
+.menu {
+    padding: 0;
+
+    &__item {
+        padding: 6px 20px;
+        list-style-type: none;
+        transition: background-color 200ms;
+        cursor: pointer;
+
+        a {
+            color: lighten(white, 20%);
+            text-decoration: none;
+
+            &:hover {
+                color: unset;
+                text-decoration: none;
+            }
+
+            &:active {
+                color: #ccbc9c;
+            }
+        }
+
+        &--active {
+            background-color: #ccbc9c;
+
+            a {
+                color: #050302;
+            }
+        }
+    }
+}
