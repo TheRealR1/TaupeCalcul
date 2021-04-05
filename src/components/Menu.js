@@ -7,11 +7,11 @@ const items = [
         path: '/',
         text: 'Accueil'
     },{
-        path: '/calcul',
-        text: 'Calcul'
-    },{
         path: '/login',
         text: 'Connexion'
+    },{
+        path: '/palmares',
+        text: 'Palmares'
     },{
         path: '/profile',
         text: 'Profil'
@@ -25,17 +25,19 @@ function Menu(props) {
 
     return (
         <ul className="menu">
-            {items.map(item => (
+        {
+            items.map(item => (
                 <li key={item.path} 
-                    onClick={handleClick.bind(null, item.path)}
+                    onClick={ handleClick.bind(null, item.path) }
                     className={
                         props.location.pathname === item.path
                             ? 'menu__item menu__item--active'
                             : 'menu__item'
                     }>
-                <Link to={item.path}>{item.text}</Link>
+                    <Link to={item.path}>{item.text}</Link>
                 </li>
-            ))}
+            ))
+        }
         </ul>
     )
 }

@@ -1,0 +1,22 @@
+.App {
+    background-color: white;
+    text-align: center;
+    padding: 16px;
+    color: #302010;
+}
+
+.Bouton{
+    box-sizing: border-box;
+    transition: all 0.3s ease-out;
+    box-shadow: 1px 1px 1px 1px rgb(0, 0, 0);
+    transform: translate(0%,0%);
+    color: white;
+    background: #302010;
+    padding: 10px;
+    border-radius: 40px;
+    border:none;
+    cursor: pointer;
+    margin: 10px;
+    font-size: larger;
+}
+  

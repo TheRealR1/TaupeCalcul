@@ -1,0 +1,12 @@
+.Modal{
+    background-color: #ccbc9c;
+    border: 1px solid #302010;
+    color: #302010;
+    box-shadow: 1px 1px 1px rgb(0, 0, 0);
+    padding: 16px;
+    width: 300px;
+    box-sizing: border-box;
+    transition: all 0.3s ease-out;
+    margin: auto;
+    margin-top: 350;
+}
