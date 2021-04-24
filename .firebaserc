@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "taupecalcul-cdb8f"
+    "default": "taupecalcul-dev",
+    "taupecalcul-dev": "taupecalcul-dev"
   }
 }

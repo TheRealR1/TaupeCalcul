@@ -53,7 +53,7 @@ export default function Signup() {
             nom: nom,
             classe: classe,
             ecole: ecole,
-            score: 0
+            enseignant: 0
         });
     });
   }

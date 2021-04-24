@@ -33,18 +33,24 @@ export default class AffPalmares extends Component {
                 var dataUser = childSnapshot.val();
                 idUser = parseInt(childSnapshot.key);
                 
-                var listeOpeUserRef = app.database().ref("Users/" + idUser + "/listeOpe");
-                listeOpeUserRef.once('value').then( (snapshot2) => {
-                    var scoreTotal = 0;
-                    snapshot2.forEach( (childSnapshot2) => {
-                        scoreTotal += parseInt(childSnapshot2.val().score);
-                    });
+                if (parseInt(dataUser.enseignant) === 0) {
+                    var listeOpeUserRef = app.database().ref("Users/" + idUser + "/listeOpe");
+                    listeOpeUserRef.once('value').then( (snapshot2) => {
+                        var scoreTotal = 0;
+                        var tempsTotal = 0;
+                        snapshot2.forEach( (childSnapshot2) => {
+                            scoreTotal += parseInt(childSnapshot2.val().score);
+                            tempsTotal += parseInt(childSnapshot2.val().temps);
+                        });
 
-                    dataUser.score=parseInt(scoreTotal);
-                    listePalm.push(dataUser);
-                    listePalm = this.sortByScore(listePalm);
-                    this.setState({ listePalmares : listePalm });
-                });
+                        dataUser.score=parseInt(scoreTotal);
+                        dataUser.temps=parseInt(tempsTotal);
+                        listePalm.push(dataUser);
+                        listePalm = this.sortByTime(listePalm);
+                        listePalm = this.sortByScore(listePalm);
+                        this.setState({ listePalmares : listePalm });
+                    });
+                }
             });
         });
     }
@@ -52,6 +58,14 @@ export default class AffPalmares extends Component {
     sortByScore = (listeUser) => {
         listeUser.sort(
             (a, b) => b.score - a.score
+        );
+
+        return listeUser;
+    }
+
+    sortByTime = (listeUser) => {
+        listeUser.sort(
+            (a, b) => a.temps - b.temps
         );
 
         return listeUser;
@@ -99,17 +113,21 @@ export default class AffPalmares extends Component {
         var listeUser = this.state.listePalmares;
         switch (choixSort) {
             case "score":
+                listeUser = this.sortByTime(listeUser);
                 listeUser = this.sortByScore(listeUser);
                 break;
             case "ecole":
+                listeUser = this.sortByTime(listeUser);
                 listeUser = this.sortByScore(listeUser);
                 listeUser = this.sortByEcole(listeUser);
                 break;
             case "classe":
+                listeUser = this.sortByTime(listeUser);
                 listeUser = this.sortByScore(listeUser);
                 listeUser = this.sortByClasse(listeUser);
                 break;
             default:
+                listeUser = this.sortByTime(listeUser);
                 listeUser = this.sortByScore(listeUser);
                 break;
         }
@@ -121,34 +139,36 @@ export default class AffPalmares extends Component {
             <div class="container-table">
                 <div className="App2">
                     <select id="comboA" onChange={ (e) => this.onSort(e.target.value) }>
-                        <option value="score">Score</option>
-                        <option value="ecole">Ecole</option>
+                        <option value="temps">Temps</option>
                         <option value="classe">Classe</option>
+                        <option value="ecole">Ecole</option>
                     </select>
-                        <div className="table">
-                            <div className="table-header">
-                            <div className="filter__link" width="40%">Score:</div>
-                            <div className="filter__link" width="40%">Prenom:</div>
-                            <div className="filter__link" width="40%">Nom:</div>
-                            <div className="filter__link" width="40%">Classe:</div>
-                            <div className="filter__link" width="40%">Ecole:</div>
-                        </div>
-                        {
-                            this.state.listePalmares &&
-                            this.state.listePalmares.map(
-                            (user,index) =>
-                                <div className="table-content" key={index}>
-                                    <div className="table-row">
-                                        <div className="table-data">{user.score}</div>
-                                        <div className="table-data">{user.prenom}</div>
-                                        <div className="table-data">{user.nom}</div>
-                                        <div className="table-data">{user.classe}</div>
-                                        <div className="table-data">{user.ecole}</div>
-                                    </div>
+                    <div className="table">
+                        <div className="table-header">
+                        <div className="filter__link" width="40%">Score:</div>
+                        <div className="filter__link" width="40%">Temps:</div>
+                        <div className="filter__link" width="40%">Prenom:</div>
+                        <div className="filter__link" width="40%">Nom:</div>
+                        <div className="filter__link" width="40%">Classe:</div>
+                        <div className="filter__link" width="40%">Ecole:</div>
+                    </div>
+                    {
+                        this.state.listePalmares &&
+                        this.state.listePalmares.map(
+                        (user,index) =>
+                            <div className="table-content" key={index}>
+                                <div className="table-row">
+                                    <div className="table-data">{user.score}</div>
+                                    <div className="table-data">{user.temps / 100} sec</div>
+                                    <div className="table-data">{user.prenom}</div>
+                                    <div className="table-data">{user.nom}</div>
+                                    <div className="table-data">{user.classe}</div>
+                                    <div className="table-data">{user.ecole}</div>
                                 </div>
-                            )
-                        }
-                        </div>
+                            </div>
+                        )
+                    }
+                    </div>
                 </div>
             </div>      
         )

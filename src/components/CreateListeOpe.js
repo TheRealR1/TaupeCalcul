@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import app from '../firebase'
 import { Link } from "react-router-dom"
+import { Alert } from "react-bootstrap"
 
 const InputCalcul = ({ index, ope }) => {
     return (
@@ -60,7 +61,8 @@ export default class CreateListeOpe extends Component {
         this.state = {
             inputCalculList: [],
             operateur: convertOperateur(this.props.match.params.id),
-            isListeCree: false
+            isListeCree: false,
+            isListeEnvoye: false
         };
 
         this.ajouterCalcul.bind(this);
@@ -77,16 +79,32 @@ export default class CreateListeOpe extends Component {
         this.setState({ inputCalculList: this.state.inputCalculList.concat(<InputCalcul key={index} index={index} ope={ope} />) });
     }
 
+    checkAllInputCalcul = (nbCalcul) => {
+        for (var i = 0; i < nbCalcul; i++) {
+            if ((document.getElementById("c" + i + "_nombre1").value).trim() === "" ||
+                (document.getElementById("c" + i + "_nombre2").value).trim() === "" ||
+                (document.getElementById("c" + i + "_resultatCorrect").value).trim() === "" ||
+                (document.getElementById("c" + i + "_resultat1").value).trim() === "" ||
+                (document.getElementById("c" + i + "_resultat2").value).trim() === "" ||
+                (document.getElementById("c" + i + "_resultat3").value).trim() === "") {
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
     createListeOperation = (ope) => {
-        this.setState({ isListeCree : true });
         var nomListeOpe = document.getElementById("nomListeOpe").value;
-        if (nomListeOpe.trim() !== "") {
+        var nbCalcul = parseInt(document.querySelector("#calculsListeOpe").childElementCount) - 1;
+
+        if (nomListeOpe.trim() !== "" && this.checkAllInputCalcul(nbCalcul)) {
+            this.setState({ isListeEnvoye : true });
             var listesOpeRef = app.database().ref("ListeOperations");
             var idOpe = 0;
-            listesOpeRef.limitToLast(1).once('value')
-                .then(function(snapshot) {
-                    snapshot.forEach(function(childSnapshot) {
-                        idOpe = parseInt(childSnapshot.key) + 1;
+            listesOpeRef.limitToLast(1).once('value').then( (snapshot) => {
+                snapshot.forEach( (childSnapshot) => {
+                    idOpe = parseInt(childSnapshot.key) + 1;
                 });
 
                 listesOpeRef.child(idOpe).set({
@@ -98,12 +116,11 @@ export default class CreateListeOpe extends Component {
 
             var idCalcul = 0;
             var calculsRef = app.database().ref("Calculs");
-            calculsRef.limitToLast(1).once('value').then(function(snapshot) {
-                snapshot.forEach(function(childSnapshot) {
+            calculsRef.limitToLast(1).once('value').then( (snapshot) => {
+                snapshot.forEach( (childSnapshot) => {
                     idCalcul = parseInt(childSnapshot.key) + 1;
                 });
 
-                var nbCalcul = parseInt(document.querySelector("#calculsListeOpe").childElementCount) - 1;
                 for (var i = 0; i < nbCalcul; i++) {
                     var listeResultats = [
                         document.getElementById("c" + i + "_resultatCorrect").value,
@@ -133,6 +150,8 @@ export default class CreateListeOpe extends Component {
 
                     idCalcul += 1;
                 }
+
+                this.setState({ isListeCree : true });
             });
         } else {
             alert("Veuillez renseigner tous les champs !");
@@ -143,18 +162,28 @@ export default class CreateListeOpe extends Component {
         return (
             <div>
                 <Link id="retour" to={ "/listeOperation/" + this.props.match.params.id }>
-                    <button style={{ backgroundColor: '#ccbc9c', color: '#302010' }}>Retour</button>
+                    <button style={{ color: '#302010' }} disabled={ (!this.state.isListeEnvoye && this.state.isListeCree) || (this.state.isListeEnvoye && !this.state.isListeCree) }>
+                        Retour
+                    </button>
                 </Link>
                 <div className="d-flex align-items-center justify-content-center" style={{ minHeight: "50vh" }}>
                     <div className="w-100 redimWidth">
                         <div id="calculsListeOpe">
-                            <button onClick={ () => this.ajouterCalcul(this.state.operateur) } disabled={ this.state.isListeCree } style={{ backgroundColor: '#ccbc9c', color: '#302010', marginTop: '20px' }}>+ Ajouter calcul</button>
+                            <button onClick={ () => this.ajouterCalcul(this.state.operateur) } disabled={ this.state.isListeEnvoye } style={{ color: '#302010', marginTop: '20px' }}>
+                                + Ajouter calcul
+                            </button>
                             {this.state.inputCalculList}
                         </div>
                     </div>
                 </div>
                 <div style={{ marginTop: '20px' }}>
-                    <button id="creerListeOpe" onClick={ () => this.createListeOperation(this.state.operateur) } style={{ backgroundColor: '#ccbc9c', color: '#302010' }} disabled={ this.state.isListeCree }>Créer la liste d'opération</button>
+                    {
+                        this.state.isListeCree &&
+                        <Alert variant="success">Liste créée, vous pouvez maintenant appuyer sur "Retour".</Alert>
+                    }    
+                    <button id="creerListeOpe" onClick={ () => this.createListeOperation(this.state.operateur) } style={{ color: '#302010' }} disabled={ this.state.isListeEnvoye }>
+                        Créer la liste d'opération
+                    </button>
                     <input type="text" id="nomListeOpe" placeholder="Nom liste d'opération" required></input>
                 </div>
             </div>

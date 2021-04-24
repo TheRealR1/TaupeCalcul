@@ -8,11 +8,11 @@
         cursor: pointer;
 
         a {
-            color: lighten(white, 20%);
+            color: white;
             text-decoration: none;
 
             &:hover {
-                color: unset;
+                color: white;
                 text-decoration: none;
             }
 

@@ -10,6 +10,9 @@ class AffCalcul extends Component {
         super(props);
     
         this.state = {
+            myArray: [],
+            milliSecondsElapsed: 0,
+            timerInProgress: false,
             listeOpeAff :[],
             calculAff: 0,
             compteurBonneRep: 0,
@@ -21,12 +24,41 @@ class AffCalcul extends Component {
         this.passerCalculSuivant.bind(this);
         this.getCalculsListeOpe.bind(this);
         this.updateUserScore.bind(this);
+        this.updateState = this.updateState.bind(this);
+        this.textInput = React.createRef();
+        this.handleStop.bind(this);
     }
 
     componentDidMount() {
         this.getCalculsListeOpe(parseInt(this.props.match.params.id));
+        this.handleStart();
     }
   
+    textInput = () => {
+        clearInterval(this.timer);
+      };
+    
+      updateState(e) {
+        this.setState({ milliSecondsElapsed: e.target.milliSecondsElapsed });
+      }
+    
+      handleStart = () => {
+        if (this.state.timerInProgress === true) return;
+    
+        this.setState({ milliSecondsElapsed: 0});
+        this.timer = setInterval(() => {
+            this.setState({
+                milliSecondsElapsed: this.state.milliSecondsElapsed + 1,
+                timerInProgress: true
+            });
+        }, 10);
+      };
+    
+    handleStop = () => {
+        this.setState({ timerInProgress: false });
+        clearInterval(this.timer);
+    };
+
     passerCalculSuivant = () => {
       var calTmp = this.state.calculAff + 1;
       if (this.state.listeOpeAff.length > calTmp) {
@@ -79,8 +111,8 @@ class AffCalcul extends Component {
         var listeUserRef = app.database().ref("Users");
         var idUser= 0;
         var data = null;
-        listeUserRef.once('value').then(function(snapshot) {
-            snapshot.forEach(function(childSnapshot) {
+        listeUserRef.once('value').then( (snapshot) => {
+            snapshot.forEach( (childSnapshot) => {
                 if (childSnapshot.val().email === email) {
                     data = childSnapshot.val();
                     idUser = parseInt(childSnapshot.key);
@@ -91,8 +123,8 @@ class AffCalcul extends Component {
                 var listeOpeUserRef = app.database().ref("Users/" + idUser + "/listeOpe");
                 var idListeOpe = 0;
                 var isOpeDejaExistant = false;
-                listeOpeUserRef.once('value').then(function(snapshot2) {
-                    snapshot2.forEach(function(childSnapshot2) {
+                listeOpeUserRef.once('value').then( (snapshot2) => {
+                    snapshot2.forEach( (childSnapshot2) => {
                         if (!isOpeDejaExistant) {
                             if (childSnapshot2.val().idOperation === idOpe) {
                                 idListeOpe = parseInt(childSnapshot2.key);
@@ -105,7 +137,8 @@ class AffCalcul extends Component {
 
                     listeOpeUserRef.child(idListeOpe).set({
                         idOperation: idOpe,
-                        score: score
+                        score: score,
+                        temps: this.state.milliSecondsElapsed
                     });
                 });
             }
@@ -117,6 +150,7 @@ class AffCalcul extends Component {
         if (this.state.listeOpeAff.length <= calTmp) {
             this.setState({visible: true})
         }
+        this.handleStop();
     }
     
     cache = (score) => {
@@ -128,34 +162,40 @@ class AffCalcul extends Component {
   
     render() {
         return (
-            <div className="App d-flex align-items-center justify-content-center" style={{ minHeight: "100vh" }}>
-                <div className="w-100" style={{ maxWidth: "400px" }}>
-                    {
-                        this.state.listeOpeAff &&
-                        this.state.listeOpeAff[this.state.calculAff] &&
-                        <h1 className="Bouton">{this.state.listeOpeAff[this.state.calculAff].nombre1} {this.state.listeOpeAff[this.state.calculAff].operateur} {this.state.listeOpeAff[this.state.calculAff].nombre2} =</h1>
-                    }
-                    <br/>
-                    Cliquez sur la bonne réponse
-                    <br/>
+            <div>
+                <div style={{ fontSize: '30px' }}>
+                    Temps : <span class='badge badge-light'>{ Math.round(this.state.milliSecondsElapsed / 100) } sec</span>
+                </div>
+                <div className="App d-flex align-items-center justify-content-center" style={{ minHeight: "100vh" }}>
                     
-                    {
-                        this.state.listeOpeAff &&
-                        this.state.listeOpeAff[this.state.calculAff] &&
-                        this.state.listeOpeAff[this.state.calculAff].resultats.map(
-                        (res,index) =>
-                            <button className='Bouton' key={index} onClick={ () => {this.cliquerep(res)}} >
-                                { res }
-                                <img src="../taupe.png" alt="" style={{width: 100 + "px", height: 100 + "px"}}></img>
-                            </button>
-                        )
-                    }
-                    <Modal visible = {this.state.visible}
-                        cache={this.cache}
-                        rep={this.state.compteurBonneRep}/> 
+                    <div className="w-100" style={{ maxWidth: "400px" }}>
+                        {
+                            this.state.listeOpeAff &&
+                            this.state.listeOpeAff[this.state.calculAff] &&
+                            <h1 className="Bouton">{this.state.listeOpeAff[this.state.calculAff].nombre1} {this.state.listeOpeAff[this.state.calculAff].operateur} {this.state.listeOpeAff[this.state.calculAff].nombre2} =</h1>
+                        }
+                        <br/>
+                        Cliquez sur la bonne réponse
+                        <br/>
+                        
+                        {
+                            this.state.listeOpeAff &&
+                            this.state.listeOpeAff[this.state.calculAff] &&
+                            this.state.listeOpeAff[this.state.calculAff].resultats.map(
+                            (res,index) =>
+                                <button className='Bouton' key={index} onClick={ () => {this.cliquerep(res)}} >
+                                    { res }
+                                    <img src="../taupe.png" alt="" style={{width: 100 + "px", height: 100 + "px"}}></img>
+                                </button>
+                            )
+                        }
+                        <Modal visible = {this.state.visible}
+                            cache={this.cache}
+                            rep={this.state.compteurBonneRep}/> 
 
-                    <EmailUser />
-                </div>   
+                        <EmailUser />
+                    </div>   
+                </div>
             </div>
         );
     }

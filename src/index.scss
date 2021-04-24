@@ -16,3 +16,11 @@ body {
         padding: 40px;
     }
 }
+
+button {
+    background-color: #ccbc9c;
+}
+
+button:disabled {
+    background-color: white;
+}
