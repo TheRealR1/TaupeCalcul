@@ -53,8 +53,8 @@ class AffListeOpe extends Component {
             snapshot.forEach( (childSnapshot) => {
                 dataUser = childSnapshot.val();
                 if (dataUser.email === email) {
+                    this.setState({ idUser : parseInt(dataUser.idUser) })
                     if (parseInt(dataUser.enseignant) === 1) {
-                        this.setState({ idUser : parseInt(dataUser.idUser) })
                         this.setState({ isEnseignant : true });
                     }
                 }
@@ -79,8 +79,6 @@ class AffListeOpe extends Component {
 
             this.setState({ listeScoresUser : listeScore, 
                             listeTempsUser : listeTemps });
-            console.log(listeScore);
-            console.log(listeTemps);
         });
     }
 
